@@ -12,6 +12,8 @@ DBConnection()
 const userRoutes = require("./src/routes/UserRoutes")
 app.use("/user",userRoutes)
 
+const carRoutes = require("./src/routes/CarRoutes")
+app.use("/cars",carRoutes)
 
 
 const PORT = process.env.PORT

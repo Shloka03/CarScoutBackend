@@ -24,6 +24,10 @@ const userSchema = new Schema({
         type:String,
         default:"active",
         enum:["active","inactive","deleted","blocked"]
-    }
-})
+    },
+}, {
+    timestamps:true
+   }
+    
+);
 module.exports = mongoose.model("users",userSchema)

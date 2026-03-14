@@ -1,0 +1,36 @@
+const mongoose = require("mongoose")
+
+const testDriveSchema = new mongoose.Schema({
+
+    buyerId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"buyers",
+        required:true
+    },
+
+    sellerId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"sellers",
+        required:true
+    },
+
+    carId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"cars",
+        required:true
+    },
+
+    testDriveDate:{
+        type:Date,
+        required:true
+    },
+
+    status:{
+        type:String,
+        enum:["requested","approved","completed","cancelled"],
+        default:"requested"
+    }
+
+})
+
+module.exports = mongoose.model("testdrives",testDriveSchema)

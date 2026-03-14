@@ -5,8 +5,15 @@ const mailSend = require("../utils/MailUtil")
 const registerUser = async(req,res)=>{
     try{
         const { fullName,email,password }= req.body
+        const existingUser = await userSchema.findOne({email})
+        if(existingUser){
+          return res.status(400).json({
+            message:"User already exists"
+            })
+        }
         const hashedPassword = await bcrypt.hash(password,10)
         const savedUser = await userSchema.create({fullName,email,password:hashedPassword})
+        //savedUser.password = undefined
 
         const htmlMessage = `
 <div style="background:#f4f6fb;padding:40px 0;font-family:Arial,Helvetica,sans-serif;">
@@ -81,38 +88,47 @@ const registerUser = async(req,res)=>{
 
     }
 }
-const loginUser =async(req,res) =>{
+const loginUser = async(req,res) =>{
     try{
+
         const {email,password} = req.body
-        const foundUserFromEmail = await userSchema.findOne({email:email})
-        console.log(foundUserFromEmail)
-        if(foundUserFromEmail){
-            const isPasswordMatched = await bcrypt.compare(password,foundUserFromEmail.password)
-            if(isPasswordMatched){
-                res.status(200).json({
-                    message:"Login success",
-                    data:foundUserFromEmail,
-                    role:foundUserFromEmail.role
-                })
-            } else{
-                res.status(401).json({
-                    message:"Invalid credentials"
-                })
-            }
-        }
-        else{
-            res.status(404).json({
-                message:"user not found."
+
+        const foundUserFromEmail = await userSchema.findOne({email})
+
+        if(!foundUserFromEmail){
+            return res.status(404).json({
+                message:"User not found"
             })
         }
+
+        if(foundUserFromEmail.accountStatus !== "active"){
+            return res.status(403).json({
+                message:"Account is not active"
+            })
+        }
+
+        const isPasswordMatched = await bcrypt.compare(password,foundUserFromEmail.password)
+
+        if(!isPasswordMatched){
+            return res.status(401).json({
+                message:"Invalid credentials"
+            })
+        }
+
+        foundUserFromEmail.password = undefined
+
+        res.status(200).json({
+            message:"Login success",
+            data:foundUserFromEmail,
+            role:foundUserFromEmail.role
+        })
 
     }
     catch(err){
         res.status(500).json({
-            message:"error while logging in",
-            err:err
+            message:"Error while logging in",
+            err
         })
-
     }
 }
 module.exports = {
