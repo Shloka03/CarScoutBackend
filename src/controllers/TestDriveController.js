@@ -3,6 +3,17 @@ const TestDrive = require("../models/TestDriveModel")
 // Book Test Drive
 const createTestDrive = async (req, res) => {
   try {
+    const existingTestDrive = await TestDrive.findOne({
+    buyerId:req.body.buyerId,
+    carId:req.body.carId,
+    testDriveDate:req.body.testDriveDate
+  })
+
+  if(existingTestDrive){
+  return res.status(400).json({
+     message:"Test drive already requested"
+  })
+}
 
     const newTestDrive = await TestDrive.create(req.body)
 

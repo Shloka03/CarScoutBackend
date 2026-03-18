@@ -4,7 +4,7 @@ const testDriveSchema = new mongoose.Schema({
 
     buyerId:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"buyers",
+        ref:"users",
         required:true
     },
 

@@ -1,10 +1,13 @@
 const userSchema = require("../models/UserModel")
+const Seller = require("../models/SellerModel")
 const bcrypt = require("bcrypt")
 const mailSend = require("../utils/MailUtil")
+const jwt = require("jsonwebtoken")
+const secret = "secret"
 
 const registerUser = async(req,res)=>{
     try{
-        const { fullName,email,password }= req.body
+        const { fullName,email,password,role,sellerType,companyName }= req.body
         const existingUser = await userSchema.findOne({email})
         if(existingUser){
           return res.status(400).json({
@@ -12,7 +15,26 @@ const registerUser = async(req,res)=>{
             })
         }
         const hashedPassword = await bcrypt.hash(password,10)
-        const savedUser = await userSchema.create({fullName,email,password:hashedPassword})
+        const savedUser = await userSchema.create({fullName,email,password:hashedPassword,role: role || "user"})
+        /*
+    AUTO CREATE SELLER PROFILE
+    */
+    if (savedUser.role === "seller") {
+
+      const existingSeller = await Seller.findOne({
+      userId: savedUser._id
+  })
+
+    if(!existingSeller){
+      await Seller.create({
+        userId: savedUser._id,
+        companyName: companyName || "",
+        sellerType: sellerType || "dealer",
+        verificationStatus: false
+    })
+  }
+
+}
         //savedUser.password = undefined
 
         const htmlMessage = `
@@ -93,7 +115,7 @@ const loginUser = async(req,res) =>{
 
         const {email,password} = req.body
 
-        const foundUserFromEmail = await userSchema.findOne({email})
+        const foundUserFromEmail = await userSchema.findOne({email:email})
 
         if(!foundUserFromEmail){
             return res.status(404).json({
@@ -115,11 +137,13 @@ const loginUser = async(req,res) =>{
             })
         }
 
-        foundUserFromEmail.password = undefined
+        //foundUserFromEmail.password = undefined
+        const token = jwt.sign(foundUserFromEmail.toObject(),secret)
 
         res.status(200).json({
             message:"Login success",
-            data:foundUserFromEmail,
+            //data:foundUserFromEmail,
+            token:token,
             role:foundUserFromEmail.role
         })
 

@@ -36,6 +36,15 @@ app.use("/reports",reportRoutes)
 const mediaRoutes = require("./src/routes/MediaGalleryRoutes")
 app.use("/media",mediaRoutes)
 
+const offerRoutes = require("./src/routes/OfferRoutes")
+app.use("/offers",offerRoutes)
+
+const feedbackRoutes = require("./src/routes/FeedbackRoutes")
+app.use("/feedback",feedbackRoutes)
+
+const notificationRoutes = require("./src/routes/NotificationRoutes")
+app.use("/notifications",notificationRoutes)
+
 
 const PORT = process.env.PORT
 app.listen(PORT,()=>{

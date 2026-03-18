@@ -1,9 +1,10 @@
 const express = require("express")
 const router = express.Router()
 const mediaController = require("../controllers/MediaGalleryController")
-
-router.post("/add",mediaController.addMedia)
+const upload = require("../middleware/UploadMiddleware")
+router.post("/add",upload.single("media"),mediaController.addMedia)
 router.get("/get",mediaController.getAllMedia)
+router.put("/update/:id",mediaController.updateMedia)
 router.delete("/delete/:id",mediaController.deleteMedia)
 
 

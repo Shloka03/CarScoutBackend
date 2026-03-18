@@ -3,6 +3,15 @@ const InspectionReport = require("../models/InspectionReportModel")
 // Create report
 const createReport = async(req,res)=>{
     try{
+        const existingReport = await InspectionReport.findOne({
+        carId:req.body.carId
+    })
+
+        if(existingReport){
+        return res.status(400).json({
+        message:"Inspection report already exists"
+    })
+}
 
         const report = await InspectionReport.create(req.body)
 
@@ -57,6 +66,30 @@ const getReportById = async(req,res)=>{
     }
 }
 
+const updateReport = async (req, res) => {
+  try {
+
+    const reportId = req.params.id
+
+    const updatedReport = await InspectionReport.findByIdAndUpdate(
+      reportId,
+      req.body,
+      { new: true }
+    )
+
+    res.status(200).json({
+      message: "Inspection report updated successfully",
+      data: updatedReport
+    })
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Error updating inspection report",
+      err
+    })
+  }
+}
+
 // Delete report
 const deleteReport = async(req,res)=>{
     try{
@@ -80,5 +113,6 @@ module.exports = {
     createReport,
     getAllReports,
     getReportById,
+    updateReport,
     deleteReport
 }

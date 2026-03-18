@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-const transactionSchema = new mongoose.Schema({
+const offerSchema = new mongoose.Schema({
 
     buyerId:{
         type:mongoose.Schema.Types.ObjectId,
@@ -20,21 +20,22 @@ const transactionSchema = new mongoose.Schema({
         required:true
     },
 
-    finalPrice:{
-        type:Number
+    offeredPrice:{
+        type:Number,
+        required:true
     },
 
-    status:{
+    offerStatus:{
         type:String,
-        enum:["pending","completed","cancelled"],
+        enum:["pending","accepted","rejected"],
         default:"pending"
     },
 
-    transactionTime:{
+    offerDate:{
         type:Date,
         default:Date.now
     }
 
 })
 
-module.exports = mongoose.model("transactions",transactionSchema)
+module.exports = mongoose.model("offers",offerSchema)

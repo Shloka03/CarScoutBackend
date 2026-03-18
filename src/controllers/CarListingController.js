@@ -4,6 +4,16 @@ const Listing = require("../models/CarListingModel")
 // Create Listing
 const createListing = async (req, res) => {
   try {
+    const existingListing = await Listing.findOne({
+    carId:req.body.carId,
+    status:"active"
+ })
+
+  if(existingListing){
+    return res.status(400).json({
+    message:"Car is already listed"
+ })
+}
 
     const newListing = await Listing.create(req.body)
 

@@ -3,6 +3,15 @@ const Transaction = require("../models/TransactionModel")
 // Create Transaction
 const createTransaction = async (req, res) => {
   try {
+    const existingTransaction = await Transaction.findOne({
+    carId:req.body.carId
+  })
+
+    if(existingTransaction){
+      return res.status(400).json({
+      message:"Transaction already exists for this car"
+ })
+}
 
     const newTransaction = await Transaction.create(req.body)
 
@@ -34,12 +43,12 @@ const getAllTransactions = async (req, res) => {
       data: transactions
     })
 
-  } catch (err) {
-    res.status(500).json({
-      message: "Error fetching transactions",
-      err
-    })
-  }
+  } catch(err){
+  res.status(500).json({
+    message:"Error fetching transactions",
+    err: err.message
+  })
+}
 }
 
 

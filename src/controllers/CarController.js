@@ -1,8 +1,24 @@
 const Car = require("../models/CarModel")
+const Media = require("../models/MediaGalleryModel")
+
 
 // Add Car
 const addCar = async (req, res) => {
   try {
+    {/*const existingCar = await Car.findOne({
+    sellerId:req.body.sellerId,
+    brand:req.body.brand,
+    model:req.body.model,
+    year:req.body.year
+})
+
+  if(existingCar){
+   return res.status(400).json({
+     message:"Car already exists"
+ })
+}*/}
+
+
 
     const newCar = await Car.create(req.body)
 
@@ -26,9 +42,24 @@ const getAllCars = async (req, res) => {
 
     const cars = await Car.find().populate("sellerId")
 
+    //get all media
+   const media = await Media.find({ carId: car._id }).select("mediaUrl mediaType")
+
+    //attach media to each car
+    const carsWithMedia = cars.map(car => {
+      const carMedia = media.filter(
+        m => m.carId.toString() === car._id.toString()
+      )
+
+      return {
+        ...car.toObject(),
+        media: carMedia
+      }
+    })
+
     res.status(200).json({
       message: "Cars fetched successfully",
-      data: cars
+      data: carsWithMedia
     })
 
   } catch (err) {
@@ -45,6 +76,7 @@ const getCarById = async (req, res) => {
   try {
 
     const carId = req.params.id
+    //get car
 
     const car = await Car.findById(carId).populate("sellerId")
 
@@ -53,10 +85,21 @@ const getCarById = async (req, res) => {
         message: "Car not found"
       })
     }
+    // Get media for this car
+    const media = await Media.find({
+  carId: car._id
+})
+
+    // Combine car + media
+    const carWithMedia = {
+      ...car.toObject(),
+      media: media
+    }
+    
 
     res.status(200).json({
       message: "Car fetched successfully",
-      data: car
+      data: carWithMedia
     })
 
   } catch (err) {

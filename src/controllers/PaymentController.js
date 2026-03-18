@@ -3,6 +3,15 @@ const Payment = require("../models/PaymentModel")
 // Create Payment
 const createPayment = async (req, res) => {
   try {
+    const existingPayment = await Payment.findOne({
+    transactionId:req.body.transactionId
+  })
+
+    if(existingPayment){
+     return res.status(400).json({
+     message:"Payment already completed"
+ })
+}
 
     const newPayment = await Payment.create(req.body)
 

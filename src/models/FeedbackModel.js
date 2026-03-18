@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-const transactionSchema = new mongoose.Schema({
+const feedbackSchema = new mongoose.Schema({
 
     buyerId:{
         type:mongoose.Schema.Types.ObjectId,
@@ -16,25 +16,25 @@ const transactionSchema = new mongoose.Schema({
 
     carId:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"cars",
-        required:true
+        ref:"cars"
     },
 
-    finalPrice:{
-        type:Number
+    rating:{
+        type:Number,
+        required:true,
+        min:1,
+        max:5
     },
 
-    status:{
-        type:String,
-        enum:["pending","completed","cancelled"],
-        default:"pending"
+    comment:{
+        type:String
     },
 
-    transactionTime:{
+    feedbackDate:{
         type:Date,
         default:Date.now
     }
 
 })
 
-module.exports = mongoose.model("transactions",transactionSchema)
+module.exports = mongoose.model("feedbacks",feedbackSchema)
