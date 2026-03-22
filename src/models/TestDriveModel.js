@@ -24,6 +24,10 @@ const testDriveSchema = new mongoose.Schema({
         type:Date,
         required:true
     },
+    testDriveTime: {
+  type: String,
+  required: true
+},
 
     status:{
         type:String,

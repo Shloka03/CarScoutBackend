@@ -1,11 +1,12 @@
 const express = require("express")
 const router = express.Router()
 const carController = require("../controllers/CarController")
+const allowRoles = require("../middleware/RoleMiddleware");
 
 const testMiddleware = require("../middleware/TestMiddleware")
 const validateToken = require("../middleware/AuthMiddleware")
-router.post("/add",carController.addCar)
-router.get("/get",validateToken, carController.getAllCars)
+router.post("/add",validateToken,allowRoles("seller"),carController.addCar)
+router.get("/get",carController.getAllCars)
 
 router.get("/get/:id", carController.getCarById)
 router.put("/update/:id", carController.updateCar)

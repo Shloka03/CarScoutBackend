@@ -19,8 +19,11 @@ const addCar = async (req, res) => {
 }*/}
 
 
-
-    const newCar = await Car.create(req.body)
+console.log("USER:", req.user);
+    const newCar = await Car.create({
+  ...req.body,
+  sellerId: req.user.id
+});
 
     res.status(201).json({
       message: "Car added successfully",
@@ -40,35 +43,74 @@ const addCar = async (req, res) => {
 const getAllCars = async (req, res) => {
   try {
 
-    const cars = await Car.find().populate("sellerId")
+    const { brand, fuelType, transmission, minPrice, maxPrice, search } = req.query;
 
-    //get all media
-   const media = await Media.find({ carId: car._id }).select("mediaUrl mediaType")
+let filter = {};
 
-    //attach media to each car
+// 🔍 ADVANCED SEARCH
+if (search) {
+  const words = search.split(" ");
+
+  filter.$and = words.map((word) => ({
+    $or: [
+      { brand: { $regex: word, $options: "i" } },
+      { model: { $regex: word, $options: "i" } }
+    ]
+  }));
+}
+
+// BRAND
+if (brand) {
+  filter.brand = { $regex: brand, $options: "i" };
+}
+
+// FUEL
+if (fuelType) {
+  filter.fuelType = { $regex: fuelType, $options: "i" };
+}
+
+// TRANSMISSION
+if (transmission) {
+  filter.transmission = { $regex: transmission, $options: "i" };
+}
+
+// PRICE
+if (minPrice && maxPrice) {
+  filter.price = {
+    $gte: Number(minPrice),
+    $lte: Number(maxPrice),
+  };
+}
+
+    const cars = await Car.find(filter);
+
+    const media = await Media.find({
+  carId: { $in: cars.map(c => c._id) }
+});
+
     const carsWithMedia = cars.map(car => {
       const carMedia = media.filter(
         m => m.carId.toString() === car._id.toString()
-      )
+      );
 
       return {
         ...car.toObject(),
         media: carMedia
-      }
-    })
+      };
+    });
 
     res.status(200).json({
       message: "Cars fetched successfully",
       data: carsWithMedia
-    })
+    });
 
   } catch (err) {
     res.status(500).json({
       message: "Error fetching cars",
       err
-    })
+    });
   }
-}
+};
 
 
 // Get Car By ID
@@ -78,7 +120,7 @@ const getCarById = async (req, res) => {
     const carId = req.params.id
     //get car
 
-    const car = await Car.findById(carId).populate("sellerId")
+    const car = await Car.findById(carId)
 
     if (!car) {
       return res.status(404).json({

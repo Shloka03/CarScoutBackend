@@ -44,7 +44,9 @@ const addMedia = async(req,res)=>{
 const getAllMedia = async(req,res)=>{
     try{
 
-        const media = await Media.find().populate("carId")
+        const media = await Media.find({
+  carId: { $in: cars.map(c => c._id) }
+});
 
         res.status(200).json({
             message:"Media fetched",

@@ -3,33 +3,48 @@ const TestDrive = require("../models/TestDriveModel")
 // Book Test Drive
 const createTestDrive = async (req, res) => {
   try {
+
+    const { carId, sellerId, testDriveDate, testDriveTime } = req.body;
+
+    if (!sellerId) {
+      return res.status(400).json({
+        message: "Seller ID required"
+      });
+    }
+
     const existingTestDrive = await TestDrive.findOne({
-    buyerId:req.body.buyerId,
-    carId:req.body.carId,
-    testDriveDate:req.body.testDriveDate
-  })
+      buyerId: req.user.id,
+      carId,
+      testDriveDate,
+      testDriveTime
+    });
 
-  if(existingTestDrive){
-  return res.status(400).json({
-     message:"Test drive already requested"
-  })
-}
+    if (existingTestDrive) {
+      return res.status(400).json({
+        message: "Test drive already requested"
+      });
+    }
 
-    const newTestDrive = await TestDrive.create(req.body)
+    const newTestDrive = await TestDrive.create({
+      buyerId: req.user.id,   // ✅ from token
+      carId,
+      sellerId,               // ✅ from frontend (userId)
+      testDriveDate,
+      testDriveTime
+    });
 
     res.status(201).json({
       message: "Test drive scheduled successfully",
       data: newTestDrive
-    })
+    });
 
   } catch (err) {
     res.status(500).json({
       message: "Error scheduling test drive",
       err
-    })
+    });
   }
-}
-
+};
 
 // Get All Test Drives
 const getAllTestDrives = async (req, res) => {

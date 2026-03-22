@@ -138,13 +138,21 @@ const loginUser = async(req,res) =>{
         }
 
         //foundUserFromEmail.password = undefined
-        const token = jwt.sign(foundUserFromEmail.toObject(),secret)
+        const token = jwt.sign(
+  {
+    id: foundUserFromEmail._id,
+    role: foundUserFromEmail.role
+  },
+  secret,
+  { expiresIn: "1d" }
+);
 
         res.status(200).json({
             message:"Login success",
             //data:foundUserFromEmail,
             token:token,
-            role:foundUserFromEmail.role
+            role:foundUserFromEmail.role,
+            userId: foundUserFromEmail._id 
         })
 
     }

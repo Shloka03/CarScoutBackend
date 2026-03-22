@@ -1,42 +1,52 @@
-const jwt = require("jsonwebtoken")
-const secret = "secret"
+const jwt = require("jsonwebtoken");
 
-const validateToken = async(req,res,next)=>{
-    try{
-        const token = req.headers.authorization
-        console.log(token)
-        //token bearer
-        if(token){
-            if(token.startsWith("Bearer ")){
-                const tokenValue = token.split(" ")[1]
-                //verify token using jwt
-                const decodedData = jwt.verify(tokenValue,secret)
-                console.log(decodedData)
-                next()
+const secret = "secret";
 
-            }
-            else{
-                res.status(401).json({
-                    message:"token is not a bearer token.."
-                })
-            }
-        }
-         else{
-            res.status(401).json({
-                message:"token is not present.."
-            })
-        }
-        
-        
+const validateToken = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization;
 
+    // 🔍 CHECK TOKEN EXISTS
+    if (!token) {
+      return res.status(401).json({
+        message: "Token not present"
+      });
     }
-    catch(err){
-        console.log(err)
-        res.status(500).json({
-            message:"error while validating token",
-            err:err
-        })
 
+    // 🔍 CHECK BEARER FORMAT
+    if (!token.startsWith("Bearer ")) {
+      return res.status(401).json({
+        message: "Token is not Bearer format"
+      });
     }
-}
-module.exports = validateToken
+
+    // 🔍 EXTRACT TOKEN VALUE
+    const tokenValue = token.split(" ")[1];
+
+    // 🔐 VERIFY TOKEN
+    const decodedData = jwt.verify(tokenValue, secret);
+    console.log("DECODED TOKEN:",decodedData)
+
+    // 🔥 IMPORTANT: ATTACH USER DATA TO REQUEST
+   req.user = {
+  id: decodedData.id || decodedData._id,  // ✅ FIXED
+  role: decodedData.role
+};
+console.log("DECODED:", decodedData);
+console.log("REQ.USER:", req.user);
+
+
+    // 👉 Example: req.user = { id, email, role }
+
+    next();
+
+  } catch (err) {
+    console.log(err);
+
+    return res.status(401).json({
+      message: "Unauthorized - Invalid or expired token"
+    });
+  }
+};
+
+module.exports = validateToken;
