@@ -35,6 +35,8 @@ const testDriveSchema = new mongoose.Schema({
         default:"requested"
     }
 
+},{
+    timestamps:true
 })
 
 module.exports = mongoose.model("testdrives",testDriveSchema)

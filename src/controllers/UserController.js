@@ -1,5 +1,6 @@
 const userSchema = require("../models/UserModel")
 const Seller = require("../models/SellerModel")
+const Buyer = require("../models/BuyerModel");
 const bcrypt = require("bcrypt")
 const mailSend = require("../utils/MailUtil")
 const jwt = require("jsonwebtoken")
@@ -163,7 +164,44 @@ const loginUser = async(req,res) =>{
         })
     }
 }
+
+
+
+const getProfile = async (req, res) => {
+  try {
+
+    const user = await userSchema.findById(req.user.id).select("-password");
+
+    let extraData = null;
+
+    // 🔥 CHECK ROLE
+    if (user.role === "seller") {
+      extraData = await Seller.findOne({ userId: user._id });
+    }
+
+    if (user.role === "user") {
+      extraData = await Buyer.findOne({ userId: user._id });
+    }
+
+    res.status(200).json({
+      message: "Profile fetched",
+      data: {
+        ...user.toObject(),
+        extra: extraData   // 🔥 IMPORTANT
+      }
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Error fetching profile",
+      err
+    });
+  }
+};
+
+
 module.exports = {
     registerUser,
-    loginUser
+    loginUser,
+    getProfile
 }
