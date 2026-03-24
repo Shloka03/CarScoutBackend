@@ -15,7 +15,11 @@ const createListing = async (req, res) => {
  })
 }
 
-    const newListing = await Listing.create(req.body)
+    //const newListing = await Listing.create(req.body)
+    const newListing = await Listing.create({
+  ...req.body,
+  sellerId: req.user.id
+});
 
     res.status(201).json({
       message: "Car listing created successfully",
@@ -51,7 +55,27 @@ const getAllListings = async (req, res) => {
     })
   }
 }
+const getMyListings = async (req, res) => {
+  try {
 
+    const listings = await Listing.find({
+      sellerId: req.user.id   // 🔥 IMPORTANT FIX
+    })
+      .populate("carId")
+      .populate("sellerId");
+
+    res.status(200).json({
+      message: "My listings fetched successfully",
+      data: listings
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Error fetching my listings",
+      err
+    });
+  }
+};
 
 // Get Listing By ID
 const getListingById = async (req, res) => {
@@ -134,6 +158,7 @@ const deleteListing = async (req, res) => {
 module.exports = {
   createListing,
   getAllListings,
+  getMyListings,
   getListingById,
   updateListing,
   deleteListing

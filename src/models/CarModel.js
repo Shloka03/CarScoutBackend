@@ -27,7 +27,7 @@ const carSchema = new mongoose.Schema({
         required:true
     },
 
-    distanceDriven:{
+    mileage:{
         type:Number
     },
 

@@ -10,7 +10,7 @@ const listingSchema = new mongoose.Schema({
 
     sellerId:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"sellers",
+        ref:"users",
         required:true
     },
 
