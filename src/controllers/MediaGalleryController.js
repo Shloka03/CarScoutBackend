@@ -2,43 +2,43 @@ const Media = require("../models/MediaGalleryModel")
 const uploadToCloudinary = require("../utils/CloudinaryUtil")
 
 // Upload media
-const addMedia = async(req,res)=>{
-    try{
-        if(!req.file){
-            return res.status(400).json({
-                message:"File is required"
-            })
-        }
-        const cloudinaryResponse = await uploadToCloudinary(req.file.path)
-        const existingMedia = await Media.findOne({
-        carId:req.body.carId,
-        mediaUrl:cloudinaryResponse.secure_url
-    })
+const addMedia = async (req, res) => {
+  try {
 
-        if(existingMedia){
-        return res.status(400).json({
-        message:"Media already uploaded"
-    })
-}
-
-        const media = await Media.create({
-            carId:req.body.carId,
-            mediaType:req.body.mediaType,
-            mediaUrl:cloudinaryResponse.secure_url
-        })
-
-        res.status(201).json({
-            message:"Media uploaded successfully",
-            data:media
-        })
-
-    }catch(err){
-        res.status(500).json({
-            message:"Error uploading media",
-            err
-        })
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        message: "Files are required"
+      });
     }
-}
+
+    const uploadedMedia = [];
+
+    // 🔥 LOOP THROUGH ALL FILES
+    for (let file of req.files) {
+
+      const cloudinaryResponse = await uploadToCloudinary(file.path);
+
+      const media = await Media.create({
+        carId: req.body.carId,
+        mediaType: req.body.mediaType,
+        mediaUrl: cloudinaryResponse.secure_url
+      });
+
+      uploadedMedia.push(media);
+    }
+
+    res.status(201).json({
+      message: "Media uploaded successfully",
+      data: uploadedMedia
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Error uploading media",
+      err
+    });
+  }
+};
 
 // Get all media
 const getAllMedia = async(req,res)=>{

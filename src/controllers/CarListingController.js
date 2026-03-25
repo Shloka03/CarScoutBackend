@@ -1,4 +1,5 @@
 const Listing = require("../models/CarListingModel")
+const Media = require("../models/MediaGalleryModel")
 
 
 // Create Listing
@@ -41,32 +42,77 @@ const getAllListings = async (req, res) => {
 
     const listings = await Listing.find()
       .populate("carId")
-      .populate("sellerId")
+      .populate("sellerId");
+
+    const carIds = listings.map(l => l.carId._id);
+
+    const media = await Media.find({
+      carId: { $in: carIds }
+    });
+
+    const listingsWithMedia = listings.map(listing => {
+      const carMedia = media.filter(
+        m => m.carId.toString() === listing.carId._id.toString()
+      );
+
+      return {
+        ...listing.toObject(),
+        carId: {
+          ...listing.carId.toObject(),
+          media: carMedia
+        }
+      };
+    });
 
     res.status(200).json({
       message: "Listings fetched successfully",
-      data: listings
-    })
+      data: listingsWithMedia
+    });
 
   } catch (err) {
     res.status(500).json({
       message: "Error fetching listings",
       err
-    })
+    });
   }
-}
+};
+//mylistings
 const getMyListings = async (req, res) => {
   try {
 
+    // 🔥 STEP 1: get listings
     const listings = await Listing.find({
-      sellerId: req.user.id   // 🔥 IMPORTANT FIX
+      sellerId: req.user.id
     })
       .populate("carId")
       .populate("sellerId");
 
+    // 🔥 STEP 2: get all car IDs
+    const carIds = listings.map(l => l.carId._id);
+
+    // 🔥 STEP 3: fetch media
+    const media = await Media.find({
+      carId: { $in: carIds }
+    });
+
+    // 🔥 STEP 4: attach media to each car
+    const listingsWithMedia = listings.map(listing => {
+      const carMedia = media.filter(
+        m => m.carId.toString() === listing.carId._id.toString()
+      );
+
+      return {
+        ...listing.toObject(),
+        carId: {
+          ...listing.carId.toObject(),
+          media: carMedia
+        }
+      };
+    });
+
     res.status(200).json({
       message: "My listings fetched successfully",
-      data: listings
+      data: listingsWithMedia
     });
 
   } catch (err) {
