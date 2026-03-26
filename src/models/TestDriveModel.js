@@ -31,7 +31,7 @@ const testDriveSchema = new mongoose.Schema({
 
     status:{
         type:String,
-        enum:["requested","approved","completed","cancelled"],
+        enum:["requested","approved","completed","rejected"],
         default:"requested"
     }
 

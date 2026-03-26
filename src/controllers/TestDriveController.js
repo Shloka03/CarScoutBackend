@@ -46,6 +46,177 @@ const createTestDrive = async (req, res) => {
   }
 };
 
+
+
+// 🔥 GET SELLER TEST DRIVES
+const getSellerTestDrives = async (req, res) => {
+  try {
+
+    const sellerId = req.user.id;
+
+    const testDrives = await TestDrive.find({ sellerId })
+      .populate("carId")
+      .populate("buyerId");
+
+    res.status(200).json({
+      message: "Seller test drives fetched",
+      data: testDrives
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Error fetching test drives",
+      err
+    });
+  }
+};
+
+// 🔥 APPROVE TEST DRIVE
+{/*const approveTestDrive = async (req, res) => {
+  try {
+
+    const testDrive = await TestDrive.findByIdAndUpdate(
+      req.params.id,
+      { status: "approved" },
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: "Test drive approved",
+      data: testDrive
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Error approving test drive",
+      err
+    });
+  }
+};*/}
+
+const approveTestDrive = async (req, res) => {
+  try {
+
+    const testDrive = await TestDrive.findById(req.params.id);
+
+    // 🔥 SECURITY CHECK
+    if (testDrive.sellerId.toString() !== req.user.id) {
+      return res.status(403).json({
+        message: "Not authorized"
+      });
+    }
+
+    testDrive.status = "approved";
+    await testDrive.save();
+
+    res.status(200).json({
+      message: "Test drive approved",
+      data: testDrive
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Error approving test drive",
+      err
+    });
+  }
+};
+
+// 🔥 REJECT TEST DRIVE
+{/*const rejectTestDrive = async (req, res) => {
+  try {
+
+    const testDrive = await TestDrive.findById(req.params.id);
+
+    // 🔐 SECURITY CHECK
+    if (testDrive.sellerId.toString() !== req.user.id) {
+      return res.status(403).json({
+        message: "Not authorized"
+      });
+    }
+
+    testDrive.status = "rejected";
+    await testDrive.save();
+
+    res.status(200).json({
+      message: "Test drive rejected",
+      data: testDrive
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Error rejecting test drive",
+      err
+    });
+  }
+};*/}
+
+const rejectTestDrive = async (req, res) => {
+  try {
+
+    
+    const testDrive = await TestDrive.findById(req.params.id);
+
+    // ✅ FIX 1: check if exists
+    if (!testDrive) {
+      return res.status(404).json({
+        message: "Test drive not found"
+      });
+      
+    }
+
+    // ✅ FIX 2: proper string comparison
+    if (testDrive.sellerId.toString() !== req.user.id.toString()) {
+      return res.status(403).json({
+        message: "Not authorized"
+        
+      });
+      
+    }
+
+    testDrive.status = "rejected";
+    //console.log("REQ USER:", req.user.id);
+//console.log("TEST DRIVE SELLER:", testDrive?.sellerId);
+    await testDrive.save();
+
+    res.status(200).json({
+      message: "Test drive rejected",
+      data: testDrive
+    });
+
+  } catch (err) {
+    console.log("Reject Error:", err); // 🔥 ADD THIS
+    res.status(500).json({
+      message: "Error rejecting test drive",
+      err
+    });
+  }
+  
+};
+
+// 🔥 GET USER TEST DRIVES
+const getUserTestDrives = async (req, res) => {
+  try {
+
+    const testDrives = await TestDrive.find({
+      buyerId: req.user.id
+    })
+      .populate("carId")
+      .populate("sellerId");
+
+    res.status(200).json({
+      message: "User test drives fetched",
+      data: testDrives
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Error fetching user test drives",
+      err
+    });
+  }
+};
+
 // Get All Test Drives
 const getAllTestDrives = async (req, res) => {
   try {
@@ -151,6 +322,10 @@ const deleteTestDrive = async (req, res) => {
 module.exports = {
   createTestDrive,
   getAllTestDrives,
+  getSellerTestDrives,
+  approveTestDrive,
+  rejectTestDrive,
+  getUserTestDrives,
   getTestDriveById,
   updateTestDrive,
   deleteTestDrive

@@ -45,6 +45,9 @@ app.use("/feedback",feedbackRoutes)
 const notificationRoutes = require("./src/routes/NotificationRoutes")
 app.use("/notifications",notificationRoutes)
 
+const sellerRoutes = require("./src/routes/SellerRoutes")
+app.use("/seller",sellerRoutes)
+
 
 const PORT = process.env.PORT
 app.listen(PORT,()=>{
