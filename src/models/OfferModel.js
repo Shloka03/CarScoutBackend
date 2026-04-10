@@ -10,7 +10,7 @@ const offerSchema = new mongoose.Schema({
 
     sellerId:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"sellers",
+        ref:"users",
         required:true
     },
 
@@ -27,7 +27,7 @@ const offerSchema = new mongoose.Schema({
 
     offerStatus:{
         type:String,
-        enum:["pending","accepted","rejected"],
+        enum:["pending","accepted","rejected","completed"],
         default:"pending"
     },
 

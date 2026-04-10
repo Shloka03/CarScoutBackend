@@ -1,15 +1,38 @@
 const Seller = require("../models/SellerModel");
+const Listing = require("../models/CarListingModel")
 
 // 🔥 GET ALL SELLERS
 const getAllSellers = async (req, res) => {
   try {
 
     const sellers = await Seller.find()
-      .populate("userId"); // 🔥 IMPORTANT
+      .populate("userId");
+
+    // 🔥 ADD PERFORMANCE DATA
+    const updatedSellers = await Promise.all(
+      sellers.map(async (seller) => {
+
+        const totalListings = await Listing.countDocuments({
+          sellerId: seller.userId._id
+        });
+
+        const soldCars = await Listing.countDocuments({
+          sellerId: seller.userId._id,
+          status: "sold"
+        });
+
+        return {
+          ...seller.toObject(),
+          totalListings,
+          soldCars
+        };
+
+      })
+    );
 
     res.status(200).json({
       message: "Sellers fetched",
-      data: sellers
+      data: updatedSellers
     });
 
   } catch (err) {

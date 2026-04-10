@@ -31,13 +31,13 @@ const adminRoutes = require("./src/routes/AdminRoutes")
 app.use("/admin",adminRoutes)
 
 const reportRoutes = require("./src/routes/InspectionReportRoutes")
-app.use("/reports",reportRoutes)
+app.use("/inspection",reportRoutes)
 
 const mediaRoutes = require("./src/routes/MediaGalleryRoutes")
 app.use("/media",mediaRoutes)
 
 const offerRoutes = require("./src/routes/OfferRoutes")
-app.use("/offers",offerRoutes)
+app.use("/offer",offerRoutes)
 
 const feedbackRoutes = require("./src/routes/FeedbackRoutes")
 app.use("/feedback",feedbackRoutes)

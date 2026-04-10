@@ -8,20 +8,18 @@ const inspectionReportSchema = new mongoose.Schema({
         required:true
     },
 
-    healthScore:{
-        type:Number
-    },
-
-    accidentDetails:{
-        type:String
-    },
-
-    serviceDetails:{
+    serviceDetails:{    
         type:String
     },
 
     inspector:{
         type:String
+    },
+
+    verificationStatus: {
+    type: String,
+    enum: ["approved", "pending", "rejected"],
+    default: "approved"
     },
 
     inspectionDate:{
